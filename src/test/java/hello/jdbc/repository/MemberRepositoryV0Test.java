@@ -7,8 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
 class MemberRepositoryV0Test {
@@ -36,5 +38,45 @@ class MemberRepositoryV0Test {
 
         //then
         assertThat(findMember).isEqualTo(member);
+    }
+
+    @DisplayName("JDBC를 활용해 Member 데이터를 업데이트 할 수 있다.")
+    @Test
+    void update() throws SQLException {
+        //given
+        Member member = new Member("memberV2", 10000);
+        repository.save(member);
+        Member findMember = repository.findById(member.getMemberId());
+        assertThat(findMember).isEqualTo(member);
+
+        //when
+        repository.update(member.getMemberId(), 20000);
+
+        //then
+        Member updateMember = repository.findById(member.getMemberId());
+        assertThat(updateMember.getMoney()).isEqualTo(20000);
+    }
+
+    @DisplayName("JDBC를 활용해 Member 데이터를 삭제할 수 있다.")
+    @Test
+    void delete() throws SQLException {
+        //given
+        Member member = new Member("memberV3", 10000);
+        repository.save(member);
+
+        Member findMember = repository.findById(member.getMemberId());
+        log.info("findMember={}", findMember);
+        assertThat(findMember).isEqualTo(member);
+
+        repository.update(member.getMemberId(), 20000);
+        Member updatedMember = repository.findById(member.getMemberId());
+        assertThat(updatedMember.getMoney()).isEqualTo(20000);
+
+        //when
+        repository.delete(member.getMemberId());
+
+        //then
+        assertThatThrownBy(() -> repository.findById(member.getMemberId()))
+                .isInstanceOf(NoSuchElementException.class);
     }
 }
