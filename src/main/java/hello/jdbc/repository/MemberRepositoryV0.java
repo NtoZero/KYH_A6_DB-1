@@ -35,7 +35,7 @@ public class MemberRepositoryV0 {
     }
 
     public Member findById(String memberId) throws SQLException {
-        String sql = "select * from where member_id = ?";
+        String sql = "select * from member where member_id = ?";
 
         Connection con = null;
         PreparedStatement pstmt = null;
